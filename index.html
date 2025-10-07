@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report Tracker PWA</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#317EFB" />
+
+  <!-- Icons for PWA -->
+  <link rel="icon" href="icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+
+  <!-- Firebase SDKs (Modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBn86CyU4GKAJVNc93qAdeWUO9idpPbD8I",
+      authDomain: "studio-2506495245-504e9.firebaseapp.com",
+      projectId: "studio-2506495245-504e9",
+      storageBucket: "studio-2506495245-504e9.firebasestorage.app",
+      messagingSenderId: "613382717921",
+      appId: "1:613382717921:web:f012904a77fe86e69dd2a0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("reportInput");
+      const output = document.getElementById("output");
+      const saveBtn = document.getElementById("saveBtn");
+      const loadBtn = document.getElementById("loadBtn");
+
+      saveBtn.addEventListener("click", async () => {
+        const number = parseInt(input.value);
+        if (!isNaN(number)) {
+          await setDoc(doc(db, "reports", "latest"), { reportNumber: number });
+          alert("Report number saved!");
+        } else {
+          alert("Please enter a valid number.");
+        }
+      });
+
+      loadBtn.addEventListener("click", async () => {
+        const docSnap = await getDoc(doc(db, "reports", "latest"));
+        if (docSnap.exists()) {
+          output.textContent = `Report Number: ${docSnap.data().reportNumber}`;
+        } else {
+          output.textContent = "No report found.";
+        }
+      });
+    });
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log("✅ Service Worker registered"))
+        .catch(err => console.error("❌ Service Worker failed:", err));
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    button {
+      margin-right: 10px;
+    }
+
+    #output {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>📋 Report Tracker (PWA)</h1>
+  <input type="number" id="reportInput" placeholder="Enter report number" />
+  <br />
+  <button id="saveBtn">Save</button>
+  <button id="loadBtn">Load</button>
+  <p id="output"></p>
+</body>
+</html>
